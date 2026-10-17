@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useMemo, useState } from "react"
 import { Card, CardContent } from "../components/ui/Card"
 import { Input } from "../components/ui/Input"
 import { facultyMock } from "../data/mock"
@@ -6,6 +6,8 @@ import { Search, Mail, MapPin, BookOpen } from "lucide-react"
 import { Avatar, AvatarFallback } from "../components/ui/Avatar"
 
 export default function FacultyPage() {
+  const [query, setQuery] = useState("")
+  const faculty = useMemo(() => facultyMock.filter((item) => `${item.name} ${item.department} ${item.subject}`.toLowerCase().includes(query.toLowerCase())), [query])
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       <div>
@@ -15,11 +17,11 @@ export default function FacultyPage() {
 
       <div className="relative max-w-md">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Search by name or department..." className="pl-8" />
+        <Input aria-label="Search faculty" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by name, subject, or department..." className="pl-8" />
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {facultyMock.map((faculty) => (
+        {faculty.map((faculty) => (
           <Card key={faculty.id}>
             <CardContent className="p-6">
               <div className="flex items-center gap-4 mb-4">
@@ -40,15 +42,16 @@ export default function FacultyPage() {
                   <MapPin className="h-4 w-4 shrink-0" />
                   <span>{faculty.office}</span>
                 </div>
-                <div className="flex items-center gap-2 text-primary hover:underline cursor-pointer">
+                <a href={`mailto:${faculty.email}`} className="flex items-center gap-2 text-primary hover:underline">
                   <Mail className="h-4 w-4 shrink-0" />
                   <span>{faculty.email}</span>
-                </div>
+                </a>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
+      {faculty.length === 0 && <p className="rounded-xl border border-dashed p-8 text-center text-muted-foreground">No faculty match that search.</p>}
     </div>
   )
 }

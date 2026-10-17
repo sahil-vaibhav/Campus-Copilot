@@ -1,16 +1,20 @@
 import React from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "../components/ui/Card"
 import { Button } from "../components/ui/Button"
-import { Badge } from "../components/ui/Badge"
 import { currentUser, timetableMock, noticesMock } from "../data/mock"
-import { BookOpen, Calendar, MessageSquare, AlertCircle, Clock, ChevronRight } from "lucide-react"
+import { BookOpen, Calendar, MessageSquare, AlertCircle, Clock } from "lucide-react"
 import { Link } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 
 export default function DashboardPage() {
+  const { user } = useAuth()
+  const firstName = user?.user_metadata?.full_name?.split(" ")[0] || "Student"
+  const todaysClasses = timetableMock.filter((classItem) => classItem.day === "Monday")
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Good morning, {currentUser.name.split(" ")[0]} 👋</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Good morning, {firstName} 👋</h1>
         <p className="text-muted-foreground">Here's what's happening today.</p>
       </div>
 
@@ -31,7 +35,7 @@ export default function DashboardPage() {
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{timetableMock.length}</div>
+            <div className="text-2xl font-bold">{todaysClasses.length}</div>
             <p className="text-xs text-muted-foreground">For today</p>
           </CardContent>
         </Card>
@@ -61,11 +65,11 @@ export default function DashboardPage() {
         <Card className="lg:col-span-4">
           <CardHeader>
             <CardTitle>Today's Schedule</CardTitle>
-            <CardDescription>You have {timetableMock.length} classes today.</CardDescription>
+            <CardDescription>You have {todaysClasses.length} classes today.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {timetableMock.map((cls, i) => (
+              {todaysClasses.map((cls) => (
                 <div key={cls.id} className="flex items-center gap-4 rounded-lg border p-4">
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
                     <Clock className="h-6 w-6" />

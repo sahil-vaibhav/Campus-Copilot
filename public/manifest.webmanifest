@@ -1,0 +1,16 @@
+{
+  "id": "/",
+  "name": "Campus Copilot — Smart Campus Assistant",
+  "short_name": "Campus Copilot",
+  "description": "Your intelligent companion for campus life.",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "categories": ["education", "productivity"],
+  "icons": [
+    { "src": "/campus-copilot.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

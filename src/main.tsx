@@ -2,9 +2,15 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { ThemeProvider } from './components/theme-provider.tsx'
+import { registerServiceWorker } from './pwa.ts'
+
+registerServiceWorker()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <ThemeProvider defaultTheme="system" storageKey="campus-copilot-theme">
+      <App />
+    </ThemeProvider>
   </StrictMode>,
 )

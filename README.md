@@ -1,93 +1,164 @@
 # Campus Copilot
 
-## AI-Powered Smart Campus Assistant
+Campus Copilot is a responsive campus information assistant for students and faculty. It brings schedules, notices, library resources, faculty contacts, services, and feedback into one web app. Fictional sample data and a replaceable mock AI service make the project usable without a backend.
 
-Campus Copilot is a modern web application for college students and faculty. It provides a centralized interface for campus information and services through an AI-powered assistant.
-
-Developed as a college Problem-Based Learning (PBL) project under the theme **Smart & Clean Campus using Artificial Intelligence**.
-
----
+> This repository is a PBL project foundation. Demo authentication and sample content are for demonstration only and are not production identity or campus records.
 
 ## Features
 
-- **AI Campus Assistant**: Ask questions about your schedule, notices, or campus facilities.
-- **Student Dashboard**: Quick overview of attendance, upcoming classes, and unread notices.
-- **Smart Timetable**: Easily navigate your weekly class schedule.
-- **Campus Notices**: Stay updated with important announcements.
-- **Library Assistant**: Search and track books and digital resources.
-- **Faculty Directory**: Find and contact professors quickly.
-- **Campus Services**: Access essential campus facilities.
-- **Feedback System**: Report issues or provide feedback to improve campus life.
+- Student dashboard, timetable, notices and notice details, library catalogue, faculty directory, campus services, feedback, profile, and settings.
+- Campus Copilot chat with mock intent handling, source labels, suggested questions, copy, feedback, and loading states.
+- Login, registration, password reset, protected routes, and an admin interface ready for server-managed roles.
+- Light, dark, and system appearance modes; responsive desktop, tablet, and mobile navigation.
+- Installable Progressive Web App with a web manifest, offline app shell, and connection status notice.
+- Supabase-ready authentication/data integration and a separated AI service interface.
 
-## Tech Stack
+## Technology
 
-### Frontend
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS v4
-- shadcn/ui (Accessible Components)
-- Lucide React (Icons)
-- React Router (Routing)
+React 19, TypeScript, Vite, Tailwind CSS 4, React Router, TanStack Query, React Hook Form, Zod, Lucide React, Supabase JS, Drizzle ORM, and PostgreSQL.
 
-### Architecture
-- **Responsive Design**: Works seamlessly on mobile, tablet, and desktop.
-- **Dark Mode**: Fully supported with consistent design tokens.
-- **Service Layer**: Clean abstraction for API and AI services.
-- **Mock Data**: Realistic data to simulate the full experience without a backend.
+## Requirements
 
-## Folder Structure
+- Node.js 22.12 or later
+- npm
+- Optional: a Supabase project for hosted authentication and feedback persistence
+- Optional: Supabase CLI for applying migrations with `supabase db push`
+
+## Start the project
+
+Install dependencies and create your local environment file:
+
+```bash
+npm install
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+macOS/Linux:
+
+```bash
+cp .env.example .env
+```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open the local URL printed by Vite, usually `http://localhost:5173`. Without Supabase credentials, the app runs in browser-local demo mode. Demo sign-in accepts any valid email address and a password of at least 6 characters; registration saves a demo session in the current browser. Demo sessions do not authenticate a real user and should not be used for sensitive information.
+
+To create and locally preview a production build:
+
+```bash
+npm run build
+npm run preview
+```
+
+The service worker is enabled in production builds and on secure origins (HTTPS or localhost). Install prompts depend on browser and platform support. Development mode intentionally does not register a service worker, which keeps hot reload predictable.
+
+## Email and account format
+
+Enter an email address in standard `name@domain` format. The forms suggest addresses at `silveroak.edu`, but currently do not restrict sign-ups to that domain. Registration asks for a full name, email, and password with at least 8 characters (enforced by the browser form). Demo sign-in requires at least 6 password characters. With Supabase configured, Supabase Auth handles account creation and applies the project's password and email-confirmation settings. Registration supplies `full_name` and `role: student` as user metadata; client-supplied metadata must not be trusted for authorization.
+
+## Environment variables and Supabase
+
+Copy `.env.example` to `.env`. For real Supabase authentication, replace the example values with the project URL and public anon/publishable key from your Supabase project settings.
+
+| Variable | Purpose |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase project URL used by the browser client |
+| `VITE_SUPABASE_ANON_KEY` | Public Supabase anon/publishable key; protect database access with row-level security policies |
+| `DATABASE_URL` | PostgreSQL connection string for server-side Drizzle Kit migrations; never expose with a `VITE_` prefix |
+| `VITE_API_BASE_URL` | Optional future REST API base URL |
+| `VITE_AI_API_URL` | Optional future server-side AI endpoint; do not put provider keys here |
+
+Keep `.env` private. Never put a database password, Supabase service-role key, or AI provider secret in a `VITE_` variable; Vite variables are embedded in browser code. When Supabase credentials are absent, login and registration use a browser-local demo session. Production admin roles must be assigned using trusted server-side processes and enforced by database/API policies. Frontend route protection is navigation only, not authorization.
+
+## Database setup and migrations
+
+The Drizzle schema is in `src/db/schema.ts`. `drizzle.config.ts` points Drizzle Kit at that schema and writes generated migrations to `supabase/migrations`. The checked-in SQL migrations create `users`, `notices`, and `feedback`, then add a priority column to feedback.
+
+1. Create or select a Supabase project.
+2. Set `DATABASE_URL` in `.env` to the PostgreSQL connection string from the Supabase dashboard's **Project Settings > Database**. Use a direct connection or the appropriate session pooler for migration tooling; do not expose this value to the browser.
+3. Apply the checked-in files in `supabase/migrations` in numeric order (`0000_...sql`, then `0001_...sql`). You can run their SQL in the Supabase SQL Editor, or use the Supabase CLI after linking the project:
+
+   ```bash
+   supabase login
+   supabase link --project-ref YOUR_PROJECT_REF
+   supabase db push
+   ```
+
+   `supabase db push` relies on the Supabase CLI migration history. If these SQL files were already run manually or the database is not initialized for CLI migrations, do not blindly push and risk reapplying them. Check the project's migration history first, then either reconcile it with the CLI or apply only the pending SQL in the SQL Editor. Do not apply a migration twice.
+
+To change the schema, edit `src/db/schema.ts`, then generate a versioned SQL migration and review it before applying it:
+
+```bash
+npx drizzle-kit generate --name describe_the_change
+```
+
+Drizzle Kit's direct schema push bypasses the checked-in migration workflow. Use it only on a disposable development database when you intentionally want to sync the current schema directly:
+
+```bash
+npx drizzle-kit push
+```
+
+This repository has no seed script. Campus content is fictional sample data in `src/data/mock.ts`. Supabase Auth accounts and the Drizzle `users` table are separate: registering through the app creates an Auth account but does not currently insert a row in `users`.
+
+## Routes
+
+| Route | Page |
+| --- | --- |
+| `/` | Landing page |
+| `/login`, `/register`, `/forgot-password` | Authentication |
+| `/dashboard`, `/copilot`, `/timetable` | Student workspace |
+| `/notices`, `/notices/:id` | Campus announcements |
+| `/library`, `/faculty`, `/services` | Campus resources |
+| `/feedback`, `/profile`, `/settings` | Student account tools |
+| `/admin`, `/admin/users`, `/admin/notices`, `/admin/feedback` | Admin workspace |
+
+## Architecture
 
 ```text
 src/
-├── components/       # Reusable UI and Layout components
-│   ├── layout/       # AppShell, Sidebar, Topbar
-│   └── ui/           # Buttons, Cards, Inputs, etc.
-├── data/             # Mock datasets for students, timetables, etc.
-├── pages/            # Page components for each route
-├── lib/              # Utility functions
-├── App.tsx           # Main application routing
-└── main.tsx          # Entry point
+  components/     Shared UI, PWA prompt, and application layouts
+  contexts/       Authentication and theme contexts
+  data/           Fictional sample campus data
+  db/             Drizzle PostgreSQL schema
+  lib/            Shared utilities and Supabase client
+  pages/           Student, public, and admin screens
+  services/       AI and API service abstractions
+  types/           Shared application types
+  pwa.ts           Service worker registration
+public/
+  manifest.webmanifest
+  sw.js             Offline app-shell service worker
+  offline.html      Network fallback
+supabase/
+  migrations/      Versioned PostgreSQL migration SQL
 ```
 
-## Installation
+The mock AI implementation is called through an `AiService` interface so a future server-backed LLM and retrieval layer can replace it without coupling provider code to the chat UI. Keep secrets and privileged operations on a trusted backend. The browser service worker caches the app shell and same-origin static build assets; it does not cache API or auth requests.
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Set up environment variables:
-   Copy `.env.example` to `.env`
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+## Scripts
 
-## Available Routes
+- `npm run dev` — start the local Vite development server
+- `npm run build` — run the TypeScript project build and create an optimized production bundle
+- `npm run preview` — serve the production bundle locally
+- `npm run lint` — run Oxlint
+- `npm test` — run the Vitest suite
 
-- `/` - Landing Page
-- `/login` - Authentication
-- `/dashboard` - Student Dashboard
-- `/copilot` - AI Assistant Chat
-- `/timetable` - Class Schedule
-- `/notices` - Campus Announcements
-- `/library` - Library Resources
-- `/faculty` - Faculty Directory
-- `/services` - Campus Services
-- `/feedback` - Issue Reporting
-- `/profile` - Student Profile
-- `/settings` - App Preferences
+## Future work
 
-## Future Scope
-
-- **Real AI Backend Integration**: Connect to an LLM provider and RAG architecture.
-- **Database Integration**: Connect to PostgreSQL via a Node.js/Express backend.
-- **Live Notifications**: Implement WebSocket for real-time announcements.
-- **Authentication**: JWT-based secure login system.
-
-## Contributing
-Follow standard Git workflows to contribute to this project. Keep components reusable and adhere to the established design system.
+- Server-side authorization and managed roles; Supabase row-level security policies.
+- Persist notices, timetable, and library data through a REST API.
+- Add a server-side retrieval-augmented campus knowledge service for grounded AI responses.
+- Add automated accessibility and offline-install checks.
 
 ## License
-MIT License
+
+MIT

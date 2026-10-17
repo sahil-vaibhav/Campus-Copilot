@@ -117,5 +117,7 @@ Destructive: #DC2626 -> 0 72.2% 50.6%
   }
   body {
     @apply bg-background text-foreground font-sans;
+    overscroll-behavior-y: none;
+    -webkit-text-size-adjust: 100%;
   }
 }

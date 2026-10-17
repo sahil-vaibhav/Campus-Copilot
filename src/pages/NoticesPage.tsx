@@ -1,19 +1,21 @@
-import React, { useState } from "react"
+import React, { useMemo, useState } from "react"
+import { Link } from "react-router-dom"
 import { Card, CardContent } from "../components/ui/Card"
 import { Input } from "../components/ui/Input"
 import { Badge } from "../components/ui/Badge"
 import { Button } from "../components/ui/Button"
 import { noticesMock } from "../data/mock"
-import { Search, Bell, Filter, ChevronRight, Pin } from "lucide-react"
+import { Search, Bell, ChevronRight, Pin } from "lucide-react"
 
-const CATEGORIES = ["All", "Academic", "Examination", "Events", "Placement", "General"]
+const CATEGORIES = ["All", "Academic", "Examination", "Events", "Placement", "General", "Emergency"]
 
 export default function NoticesPage() {
   const [activeCategory, setActiveCategory] = useState("All")
+  const [query, setQuery] = useState("")
   
-  const filteredNotices = noticesMock.filter(n => 
-    activeCategory === "All" ? true : n.type === activeCategory
-  )
+  const filteredNotices = useMemo(() => noticesMock.filter(n =>
+    (activeCategory === "All" || n.type === activeCategory) && `${n.title} ${n.type}`.toLowerCase().includes(query.toLowerCase())
+  ), [activeCategory, query])
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
@@ -27,7 +29,7 @@ export default function NoticesPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search notices..." className="pl-8" />
+          <Input aria-label="Search notices" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search notices..." className="pl-8" />
         </div>
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 hide-scrollbar">
           {CATEGORIES.map(cat => (
@@ -46,7 +48,7 @@ export default function NoticesPage() {
 
       <div className="grid gap-4">
         {filteredNotices.map((notice) => (
-          <Card key={notice.id} className="hover:bg-muted/30 transition-colors cursor-pointer group">
+          <Link to={`/notices/${notice.id}`} key={notice.id} className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"><Card className="hover:bg-muted/30 transition-colors group">
             <CardContent className="p-4 sm:p-6 flex items-start gap-4 sm:gap-6">
               <div className="mt-1 flex-shrink-0">
                 {notice.isImportant ? (
@@ -73,7 +75,7 @@ export default function NoticesPage() {
                 <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
             </CardContent>
-          </Card>
+          </Card></Link>
         ))}
         {filteredNotices.length === 0 && (
           <div className="text-center p-12 border rounded-xl border-dashed">
