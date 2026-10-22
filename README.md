@@ -73,7 +73,8 @@ Copy `.env.example` to `.env`. For real Supabase authentication, replace the exa
 | --- | --- |
 | `VITE_SUPABASE_URL` | Supabase project URL used by the browser client |
 | `VITE_SUPABASE_ANON_KEY` | Public Supabase anon/publishable key; protect database access with row-level security policies |
-| `DATABASE_URL` | PostgreSQL connection string for server-side Drizzle Kit migrations; never expose with a `VITE_` prefix |
+| `DATABASE_URL` | PostgreSQL connection string for server-side Drizzle Kit migrations & seeding; never expose with a `VITE_` prefix |
+| `SUPABASE_SERVICE_ROLE_KEY` | Optional service role secret for server-side administrative tasks and Auth user seeding; never expose to frontend |
 | `VITE_API_BASE_URL` | Optional future REST API base URL |
 | `VITE_AI_API_URL` | Optional future server-side AI endpoint; do not put provider keys here |
 
@@ -107,7 +108,62 @@ Drizzle Kit's direct schema push bypasses the checked-in migration workflow. Use
 npx drizzle-kit push
 ```
 
-This repository has no seed script. Campus content is fictional sample data in `src/data/mock.ts`. Supabase Auth accounts and the Drizzle `users` table are separate: registering through the app creates an Auth account but does not currently insert a row in `users`.
+## Default User Login Credentials
+
+Campus Copilot includes preconfigured default user credentials for testing student, faculty, and administrative workflows in both **Demo Mode** (browser-local session) and **Supabase Mode** (hosted database and authentication).
+
+| Role | Name | Email | Password | Access / Portal |
+| --- | --- | --- | --- | --- |
+| **Admin** | Campus Administrator | `admin@silveroak.edu` | `AdminPassword123!` | Full access to Admin Portal (`/admin`), user management, notices, feedback |
+| **Student (Primary)** | Sahil Vaibhav | `sahil.v@silveroak.edu` | `StudentPassword123!` | Student dashboard (`/dashboard`), timetable, copilot, library, campus services |
+| **Student (General)** | Jane Doe | `student@silveroak.edu` | `StudentPassword123!` | Student workspace, copilot chat, feedback submission |
+| **Faculty (Head)** | Dr. A. Sharma | `asharma@silveroak.edu` | `FacultyPassword123!` | Departmental workspace, timetable schedule, student notices |
+| **Faculty (Lecturer)** | Prof. N. Patel | `npatel@silveroak.edu` | `FacultyPassword123!` | Academic courses, faculty directory, library access |
+
+> [!TIP]
+> - **Demo Mode**: When Supabase is not connected, enter any of the above emails with their password (minimum 6 characters) to sign in immediately. Entering `admin@silveroak.edu` automatically routes you to the **Admin Portal** (`/admin`).
+> - **Supabase Mode**: Run the database seed script (`npm run db:seed`) to populate database tables and register/seed auth accounts.
+
+## Database Seeding
+
+The repository provides a seeding script (`src/db/seed.ts`) and a standard Supabase SQL seed file (`supabase/seed.sql`) to initialize your PostgreSQL database with complete sample campus data:
+
+- **Users**: Admin, faculty, and student profiles
+- **Notices**: Examination schedules, placement drives, tech fest events, and emergency alerts
+- **Timetable**: Full Monday through Saturday lecture, lab, and workshop schedules
+- **Library Books**: Computer Science, AI, and Software Engineering textbooks with availability states
+- **Feedback**: Sample student feedback entries with categories, priority levels, and statuses
+
+### 1. Seeding via TypeScript / Drizzle (`npm run db:seed`)
+
+Set your database connection string in `.env`:
+
+```env
+DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
+# Optional: set for creating verified Supabase Auth accounts
+SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-secret
+```
+
+Then execute:
+
+```bash
+npm run db:seed
+```
+
+### 2. Seeding via Supabase SQL Editor or Supabase CLI
+
+If you prefer applying SQL directly in the Supabase Dashboard:
+
+1. Open your Supabase project dashboard and navigate to **SQL Editor**.
+2. Open [`supabase/seed.sql`](file:///c:/Users/Sahil/OneDrive/Desktop/Campus%20Copilot/supabase/seed.sql) and paste its contents into the editor.
+3. Click **Run**. All initial users, notices, timetable blocks, library books, and feedback records will be inserted.
+
+If using the Supabase CLI locally:
+
+```bash
+supabase db reset
+```
+*(Supabase CLI automatically applies all migrations in `supabase/migrations` followed by `supabase/seed.sql`).*
 
 ## Routes
 
@@ -151,6 +207,9 @@ The mock AI implementation is called through an `AiService` interface so a futur
 - `npm run preview` — serve the production bundle locally
 - `npm run lint` — run Oxlint
 - `npm test` — run the Vitest suite
+- `npm run db:seed` (or `npm run seed`) — run the database and Supabase Auth seeding script
+- `npm run db:generate` — generate new Drizzle migrations from schema changes
+- `npm run db:push` — directly push the current schema to PostgreSQL (development only)
 
 ## Future work
 

@@ -6,16 +6,17 @@ import { useAuth } from "../contexts/AuthContext"
 import { ThemeToggle } from "../components/ThemeToggle"
 
 export default function LandingPage() {
-  const { user, loading } = useAuth()
+  const { user, loading, role } = useAuth()
   const navigate = useNavigate()
 
   // Redirect if already logged in
   useEffect(() => {
     if (!loading && user) {
-      const role = user.app_metadata?.role
-      navigate(role === "admin" ? "/admin" : "/dashboard", { replace: true })
+      if (role === "admin") navigate("/admin", { replace: true })
+      else if (role === "faculty") navigate("/faculty-portal", { replace: true })
+      else navigate("/dashboard", { replace: true })
     }
-  }, [user, loading, navigate])
+  }, [user, loading, role, navigate])
 
   if (loading) return null
 
@@ -73,8 +74,70 @@ export default function LandingPage() {
             <div className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"><Sparkles className="h-4 w-4" /></div>
             <div className="rounded-2xl rounded-tl-sm bg-muted px-4 py-3 text-sm"><p>Your next class is <strong>Data Structures</strong> at 9:00 AM in Room 302.</p><p className="mt-3 text-xs text-muted-foreground">Source: Timetable · Updated today</p></div>
           </div>
-          <Link to="/login" className="mt-5 flex items-center gap-2 rounded-xl border px-4 py-3 text-sm text-muted-foreground transition-colors hover:border-primary/40">Ask anything about your campus… <ArrowRight className="ml-auto h-4 w-4" /></Link>
         </section>
+
+        {/* 3 Dedicated Campus Portals */}
+        <div className="mt-20 w-full max-w-5xl">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold">Three Dedicated Campus Portals</h2>
+            <p className="text-muted-foreground text-sm mt-1">Tailored experiences built specifically for Students, Faculty, and University Administrators.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6 text-left">
+            <div className="rounded-2xl border bg-card p-6 shadow-sm hover:border-primary/50 transition-all flex flex-col justify-between">
+              <div>
+                <div className="h-12 w-12 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4">
+                  <GraduationCap className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-bold">Student Portal</h3>
+                <p className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mb-2">Academic hub for learners</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Daily timetable, lecture alerts, central library search, attendance tracking, and 24/7 AI Copilot queries.
+                </p>
+              </div>
+              <Button variant="outline" className="mt-6 w-full gap-2" asChild>
+                <Link to="/login">
+                  Enter Student Portal <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+
+            <div className="rounded-2xl border bg-card p-6 shadow-sm hover:border-blue-500/50 transition-all flex flex-col justify-between">
+              <div>
+                <div className="h-12 w-12 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-bold">Faculty Portal</h3>
+                <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-2">Teaching &amp; academic operations</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Interactive attendance roll call, teaching timetable, department notices publishing, student inquiry resolution, and AI quiz generator.
+                </p>
+              </div>
+              <Button variant="outline" className="mt-6 w-full gap-2" asChild>
+                <Link to="/login">
+                  Enter Faculty Portal <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+
+            <div className="rounded-2xl border bg-card p-6 shadow-sm hover:border-purple-500/50 transition-all flex flex-col justify-between">
+              <div>
+                <div className="h-12 w-12 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-4">
+                  <Layers className="h-6 w-6" />
+                </div>
+                <h3 className="text-lg font-bold">Admin Portal</h3>
+                <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 mb-2">Governance &amp; university control</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  User accounts and role assignment, campus-wide notice management, grievance tracking, and database synchronization.
+                </p>
+              </div>
+              <Button variant="outline" className="mt-6 w-full gap-2" asChild>
+                <Link to="/login">
+                  Enter Admin Portal <ArrowRight className="h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </div>
 
         {/* Feature Grid */}
         <div id="features" className="mt-24 grid sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-5xl mx-auto w-full text-left">

@@ -5,10 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "typecheck": "tsc -b",
     "build": "tsc -b && vite build",
-    "lint": "oxlint",
+    "lint": "oxlint --deny-warnings",
+    "lint:fix": "oxlint --fix",
     "test": "vitest run",
-    "preview": "vite preview"
+    "ci": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "preview": "vite preview",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:seed": "node src/db/seed.ts",
+    "seed": "node src/db/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -42,6 +49,7 @@
     "drizzle-kit": "^0.31.11",
     "jsdom": "^29.1.1",
     "oxlint": "^1.81.0",
+    "supabase": "^2.121.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",

@@ -1,22 +1,55 @@
 import React, { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
 import { GraduationCap } from "lucide-react"
 import { isSupabaseConfigured, supabase } from "../lib/supabase"
 
 export default function LoginPage() {
-  const navigate = useNavigate()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   const [remember, setRemember] = useState(true)
 
+  const fillDemo = (role: "student" | "faculty" | "admin") => {
+    if (role === "student") {
+      setEmail("sahil.v@silveroak.edu")
+      setPassword("StudentPassword123!")
+    } else if (role === "faculty") {
+      setEmail("asharma@silveroak.edu")
+      setPassword("FacultyPassword123!")
+    } else {
+      setEmail("admin@silveroak.edu")
+      setPassword("AdminPassword123!")
+    }
+  }
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError("")
+
+    // Role detection helper
+    const detectPortalUrl = (userRole?: string | null, userEmail?: string): string => {
+      const em = (userEmail || email).toLowerCase().trim()
+      const r = (userRole || "").toLowerCase().trim()
+
+      if (r === "admin" || em === "admin@silveroak.edu" || em.includes("admin")) {
+        return "/admin"
+      }
+      if (
+        r === "faculty" ||
+        em.includes("faculty") ||
+        em === "asharma@silveroak.edu" ||
+        em === "npatel@silveroak.edu" ||
+        em.startsWith("prof.") ||
+        em.startsWith("dr.")
+      ) {
+        return "/faculty-portal"
+      }
+      return "/dashboard"
+    }
 
     if (!isSupabaseConfigured || !supabase) {
       if (!email.includes("@") || password.length < 6) {
@@ -26,10 +59,22 @@ export default function LoginPage() {
       }
       if (remember) localStorage.setItem("campus-copilot-session", email)
       else sessionStorage.setItem("campus-copilot-session", email)
-      localStorage.setItem("campus-copilot-name", email === "sahil.v@silveroak.edu" ? "Sahil Vaibhav" : email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase()))
-      window.location.assign("/dashboard")
+
+      const targetUrl = detectPortalUrl(null, email)
+      let defaultName = "Sahil Vaibhav"
+      if (targetUrl === "/admin") {
+        defaultName = "Campus Administrator"
+      } else if (targetUrl === "/faculty-portal") {
+        defaultName = "Dr. A. Sharma"
+      } else if (email !== "sahil.v@silveroak.edu") {
+        defaultName = email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+      }
+
+      localStorage.setItem("campus-copilot-name", defaultName)
+      window.location.assign(targetUrl)
       return
     }
+
     const { error, data } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -39,13 +84,9 @@ export default function LoginPage() {
       setError(error.message)
       setLoading(false)
     } else {
-      // Redirect based on role
-      const role = data.user?.user_metadata?.role
-      if (role === "admin") {
-        navigate("/admin")
-      } else {
-        navigate("/dashboard")
-      }
+      const userRole = data.user?.app_metadata?.role || data.user?.user_metadata?.role
+      const targetUrl = detectPortalUrl(userRole, data.user?.email || email)
+      window.location.assign(targetUrl)
     }
   }
 
@@ -57,9 +98,43 @@ export default function LoginPage() {
             <GraduationCap className="mx-auto h-10 w-10 text-primary mb-2" />
             <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
             <p className="text-sm text-muted-foreground">
-              Enter your college email to sign in to your account
+              Sign in to your Silver Oak University Portal
             </p>
-            {!isSupabaseConfigured && <p className="rounded-lg border border-primary/20 bg-primary/5 p-3 text-left text-xs text-muted-foreground">Demo mode: any valid email and a password with at least 6 characters opens the sample workspace. Demo accounts are not secure accounts.</p>}
+
+            {/* Quick Portal Switcher Buttons */}
+            <div className="rounded-xl border bg-muted/40 p-2.5 space-y-1.5 text-left">
+              <div className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider text-center">
+                Quick Select Portal
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => fillDemo("student")}
+                  className="rounded-lg border bg-background px-2 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary transition-all text-center flex flex-col items-center justify-center gap-0.5"
+                >
+                  <span>🎓 Student</span>
+                  <span className="text-[9px] text-muted-foreground font-normal">sahil.v@</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillDemo("faculty")}
+                  className="rounded-lg border bg-background px-2 py-1.5 text-xs font-semibold hover:border-blue-500 hover:text-blue-600 transition-all text-center flex flex-col items-center justify-center gap-0.5"
+                >
+                  <span>👨‍🏫 Faculty</span>
+                  <span className="text-[9px] text-muted-foreground font-normal">asharma@</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => fillDemo("admin")}
+                  className="rounded-lg border bg-background px-2 py-1.5 text-xs font-semibold hover:border-purple-500 hover:text-purple-600 transition-all text-center flex flex-col items-center justify-center gap-0.5"
+                >
+                  <span>🛡️ Admin</span>
+                  <span className="text-[9px] text-muted-foreground font-normal">admin@</span>
+                </button>
+              </div>
+            </div>
+
+            {!isSupabaseConfigured && <p className="rounded-lg border border-primary/20 bg-primary/5 p-2 text-left text-xs text-muted-foreground">Demo mode: select any role above or enter custom credentials to open the portal.</p>}
           </div>
           
           <form onSubmit={handleLogin} className="space-y-4">

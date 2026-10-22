@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [name, setName] = useState("")
+  const [role, setRole] = useState<"student" | "faculty">("student")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
 
@@ -22,7 +23,7 @@ export default function RegisterPage() {
       if (password.length < 6) { setError("Use a password with at least 6 characters."); setLoading(false); return }
       localStorage.setItem("campus-copilot-session", email)
       localStorage.setItem("campus-copilot-name", name)
-      window.location.assign("/dashboard")
+      window.location.assign(role === "faculty" ? "/faculty-portal" : "/dashboard")
       return
     }
 
@@ -32,7 +33,7 @@ export default function RegisterPage() {
       options: {
         data: {
           full_name: name,
-          role: "student",
+          role,
         }
       }
     })
@@ -95,6 +96,21 @@ export default function RegisterPage() {
               />
             </div>
             
+            <div className="space-y-2">
+              <label className="text-sm font-medium leading-none" htmlFor="role">
+                Account Type / Role
+              </label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value as "student" | "faculty")}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="student">🎓 Student Account</option>
+                <option value="faculty">👨‍🏫 Faculty Member / Professor</option>
+              </select>
+            </div>
+
             <div className="space-y-2">
               <label className="text-sm font-medium leading-none" htmlFor="password">
                 Password

@@ -53,4 +53,5 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 )
 Button.displayName = "Button"
 
+// oxlint-disable-next-line react/only-export-components
 export { Button, buttonVariants }

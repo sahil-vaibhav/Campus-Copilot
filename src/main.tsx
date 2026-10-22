@@ -3,14 +3,17 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
 import { ThemeProvider } from './components/theme-provider.tsx'
+import { ErrorBoundary } from './components/ErrorBoundary.tsx'
 import { registerServiceWorker } from './pwa.ts'
 
 registerServiceWorker()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="system" storageKey="campus-copilot-theme">
-      <App />
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="system" storageKey="campus-copilot-theme">
+        <App />
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>,
 )

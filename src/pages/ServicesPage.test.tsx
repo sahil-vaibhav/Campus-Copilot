@@ -1,6 +1,7 @@
-import { describe, expect, it, vi } from "vitest"
+import { describe, expect, it } from "vitest"
 import { render, screen, fireEvent } from "@testing-library/react"
-import ServicesPage, { computeServiceStatus, SERVICE_META } from "./ServicesPage"
+import ServicesPage from "./ServicesPage"
+import { computeServiceStatus, SERVICE_META } from "../data/servicesConfig"
 
 describe("Campus Services Operating Hours & Status Precision", () => {
   // Helper to create a specific Date (2026-09-28 is a Monday)

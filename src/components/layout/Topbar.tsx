@@ -8,7 +8,8 @@ import {
   CheckCheck,
   Shield,
   ArrowRight,
-  Pin
+  Pin,
+  GraduationCap
 } from "lucide-react"
 import { useLocation, useNavigate, Link } from "react-router-dom"
 import { Avatar, AvatarFallback } from "../ui/Avatar"
@@ -24,7 +25,7 @@ interface TopbarProps {
 export default function Topbar({ onMenuClick }: TopbarProps) {
   const location = useLocation()
   const navigate = useNavigate()
-  const { user, isAdmin, logout } = useAuth()
+  const { user, isAdmin, isFaculty, logout } = useAuth()
 
   // State for notifications
   const [isNotifOpen, setIsNotifOpen] = useState(false)
@@ -312,13 +313,24 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
                   <span>Settings</span>
                 </Link>
 
+                {(isFaculty || isAdmin) && (
+                  <Link
+                    to="/faculty-portal"
+                    onClick={() => setIsProfileOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground rounded-lg hover:bg-muted transition-colors"
+                  >
+                    <GraduationCap className="h-4 w-4 text-blue-500" />
+                    <span>Faculty Portal</span>
+                  </Link>
+                )}
+
                 {isAdmin && (
                   <Link
                     to="/admin"
                     onClick={() => setIsProfileOpen(false)}
                     className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground rounded-lg hover:bg-muted transition-colors"
                   >
-                    <Shield className="h-4 w-4 text-primary" />
+                    <Shield className="h-4 w-4 text-purple-500" />
                     <span>Admin Dashboard</span>
                   </Link>
                 )}
